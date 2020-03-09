@@ -2,8 +2,21 @@
 
     let DATA_URL = "https://opensky-network.org/api/states/all";
 
+    /***  little hack starts here ***/
+    // source: http://jsfiddle.net/paulovieira/yVLJf/
+    L.Map = L.Map.extend({
+        openPopup: function (popup) {
+            //        this.closePopup();  // just comment this
+            this._popup = popup;
+
+            return this.addLayer(popup).fire('popupopen', {
+                popup: this._popup
+            });
+        }
+    }); /***  end of hack ***/
+
     // create map in leaflet and tie it to the div called 'theMap'
-    var map = L.map('theMap').setView([43, -89], 4);
+    var map = L.map('theMap').setView([43, -79], 8);
 
     // load a tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -16,7 +29,7 @@
     });
 
     var markers = null;
-    var ctr = 0;
+    // var ctr = 0;
     let fetchData = async () => {
         // fetch real-time transit data
         fetch(DATA_URL)
@@ -53,20 +66,20 @@
                 if (markers !== null) {
                     markers.clearLayers();
                     markers = null;
-                    ctr = 0;
+                    // ctr = 0;
                 }
                 //  plot the markers on the map
                 markers = L.geoJSON(geojsonFeatureCA, {
                     pointToLayer: function (feature, latlng) {
                         var marker = L.marker(latlng, { icon: planeIcon, rotationAngle: feature.properties.true_track });
-                        marker.bindPopup('Call Sign: ' + feature.properties.callsign + '<br/>' +
+                        marker.bindPopup(
+                            '<h3>Flight #' + feature.properties.callsign + '</h3>' +
                             'Baro Altitude: ' + feature.properties.baro_altitude + '<br/>' +
                             'On Ground: ' + feature.properties.on_ground + '<br/>' +
                             'Velocity: ' + feature.properties.velocity + '<br/>' +
-                            'True Track: ' + feature.properties.true_track + '<br/>' +
                             'Vertical Rate: ' + feature.properties.vertical_rate + '<br/>' +
                             'Geo Altitude: ' + feature.properties.geo_altitude + '<br/>');
-                        ctr++;
+                        // ctr++;
                         return marker;
                     }
                 }).addTo(map);
